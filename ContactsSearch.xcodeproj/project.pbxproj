@@ -17,6 +17,7 @@
 		B95E7F221FB7CFE2005E0E00 /* ContactsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E7F201FB7CFE2005E0E00 /* ContactsTableViewCell.swift */; };
 		B95E7F231FB7CFE2005E0E00 /* ContactsTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B95E7F211FB7CFE2005E0E00 /* ContactsTableViewCell.xib */; };
 		B95E7F251FB7DA5E005E0E00 /* Contacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E7F241FB7DA5E005E0E00 /* Contacts.swift */; };
+		B995899A1FBA4857009A9E72 /* UITextViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99589991FBA4857009A9E72 /* UITextViewExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		B95E7F201FB7CFE2005E0E00 /* ContactsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsTableViewCell.swift; sourceTree = "<group>"; };
 		B95E7F211FB7CFE2005E0E00 /* ContactsTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ContactsTableViewCell.xib; sourceTree = "<group>"; };
 		B95E7F241FB7DA5E005E0E00 /* Contacts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contacts.swift; sourceTree = "<group>"; };
+		B99589991FBA4857009A9E72 /* UITextViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextViewExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 		B95E7EE61FB7CBEB005E0E00 = {
 			isa = PBXGroup;
 			children = (
+				B99589961FBA45AD009A9E72 /* UITextView+ */,
 				B95E7EF11FB7CBEB005E0E00 /* ContactsSearch */,
 				B95E7F061FB7CBEB005E0E00 /* ContactsSearchTests */,
 				B95E7F111FB7CBEB005E0E00 /* ContactsSearchUITests */,
@@ -132,6 +135,14 @@
 				B95E7F141FB7CBEB005E0E00 /* Info.plist */,
 			);
 			path = ContactsSearchUITests;
+			sourceTree = "<group>";
+		};
+		B99589961FBA45AD009A9E72 /* UITextView+ */ = {
+			isa = PBXGroup;
+			children = (
+				B99589991FBA4857009A9E72 /* UITextViewExtension.swift */,
+			);
+			path = "UITextView+";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -273,6 +284,7 @@
 				B95E7EF51FB7CBEB005E0E00 /* ViewController.swift in Sources */,
 				B95E7EF31FB7CBEB005E0E00 /* AppDelegate.swift in Sources */,
 				B95E7F221FB7CFE2005E0E00 /* ContactsTableViewCell.swift in Sources */,
+				B995899A1FBA4857009A9E72 /* UITextViewExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

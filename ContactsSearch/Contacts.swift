@@ -37,6 +37,8 @@ struct Contact {
 
 class ContactList {
     
+    static let store = CNContactStore()
+    
     static func getPhoneNumbersAndEmails(completion: @escaping ([Contact]) -> ()) {
         
         getAllContacts() { (contacts) in
@@ -77,7 +79,6 @@ class ContactList {
     
     private static func getAllContacts(completion: @escaping ([CNContact]) -> Void) {
         
-        let store = CNContactStore()
         let keysToFetch: [CNKeyDescriptor] = [
             CNContactGivenNameKey as CNKeyDescriptor,
             CNContactMiddleNameKey as CNKeyDescriptor,
@@ -101,4 +102,19 @@ class ContactList {
         }
     }
     
+    static func checkPermissions() {
+        
+        let status = CNContactStore.authorizationStatus(for: .contacts)
+        switch status {
+        case .notDetermined:
+            store.requestAccess(for: .contacts, completionHandler:{ success, error in
+                if success {
+                    print("Access Allowed")
+                }
+            })
+        default:
+            break
+        }
+    }
+
 }

@@ -19,6 +19,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        ContactList.checkPermissions()
+        
         contactsTableView.delegate = self
         contactsTableView.dataSource = self
         
@@ -46,6 +48,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     */
+
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        return true
+    }
+    
     
     func textViewDidChange(_ textView: UITextView) {
         /*
@@ -113,11 +121,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     private func configureCell(_ cell: ContactsTableViewCell, _ indexPath: IndexPath) {
         let contact = filteredContacts[indexPath.row]
         
+        let fullNameAttributedText = NSMutableAttributedString(string: "")
         let givenNameAttributedText = NSMutableAttributedString(string: contact.givenName)
         let middleNameAttributedText = NSMutableAttributedString(string: contact.middleName)
         let familyNameAttributedText = NSMutableAttributedString(string: contact.familyName)
-        
-        let fullNameAttributedText = NSMutableAttributedString(string: "")
         
         let contentValueAttributedText = NSMutableAttributedString(string: contact.contentValue)
         let spaceAttributedString = NSAttributedString(string: " ")
@@ -139,12 +146,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         fullNameAttributedText.append(givenNameAttributedText)
-        fullNameAttributedText.append(spaceAttributedString)
+        if !givenNameAttributedText.string.isEmpty {
+            fullNameAttributedText.append(spaceAttributedString)
+        }
         fullNameAttributedText.append(middleNameAttributedText)
-        fullNameAttributedText.append(spaceAttributedString)
+        if !middleNameAttributedText.string.isEmpty {
+            fullNameAttributedText.append(spaceAttributedString)
+        }
         fullNameAttributedText.append(familyNameAttributedText)
 
-        if fullNameAttributedText.string != "  " {
+        if !fullNameAttributedText.string.isEmpty {
             cell.title.attributedText = fullNameAttributedText
             cell.content.attributedText = contentValueAttributedText
         } else {
@@ -168,6 +179,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         configureCell(cell, indexPath)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedCell = tableView.cellForRow(at: indexPath) as! ContactsTableViewCell
+        
+        /*
+        let fullNameAttributedText = NSMutableAttributedString(string: selectedCell.title.text!)
+        fullNameAttributedText.addAttributes([NSAttributedStringKey.foregroundColor : UIColor.blue], range: NSRange(selectedCell.title.text!.range(of: selectedCell.title.text!)!, in: selectedCell.title.text!))
+        
+        let attributed = NSMutableAttributedString(string: "")
+        attributed.append(fullNameAttributedText)
+        
+        searchTextView.attributedText = fullNameAttributedText
+        */
+        
+        searchTextView.text = selectedCell.title.text!
+        
+        let position = CGPoint(x: searchTextView.textContainer.lineFragmentPadding, y: searchTextView.textContainerInset.top)
+        
+        searchTextView.addButton(with: selectedCell.title.text!, tag: 0, to: position)
     }
 }
 
