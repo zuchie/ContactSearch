@@ -14,6 +14,9 @@
 		B95E7EFD1FB7CBEB005E0E00 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B95E7EFB1FB7CBEB005E0E00 /* LaunchScreen.storyboard */; };
 		B95E7F081FB7CBEB005E0E00 /* ContactsSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E7F071FB7CBEB005E0E00 /* ContactsSearchTests.swift */; };
 		B95E7F131FB7CBEB005E0E00 /* ContactsSearchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E7F121FB7CBEB005E0E00 /* ContactsSearchUITests.swift */; };
+		B95E7F221FB7CFE2005E0E00 /* ContactsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E7F201FB7CFE2005E0E00 /* ContactsTableViewCell.swift */; };
+		B95E7F231FB7CFE2005E0E00 /* ContactsTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B95E7F211FB7CFE2005E0E00 /* ContactsTableViewCell.xib */; };
+		B95E7F251FB7DA5E005E0E00 /* Contacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E7F241FB7DA5E005E0E00 /* Contacts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +50,9 @@
 		B95E7F0E1FB7CBEB005E0E00 /* ContactsSearchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ContactsSearchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B95E7F121FB7CBEB005E0E00 /* ContactsSearchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsSearchUITests.swift; sourceTree = "<group>"; };
 		B95E7F141FB7CBEB005E0E00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B95E7F201FB7CFE2005E0E00 /* ContactsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsTableViewCell.swift; sourceTree = "<group>"; };
+		B95E7F211FB7CFE2005E0E00 /* ContactsTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ContactsTableViewCell.xib; sourceTree = "<group>"; };
+		B95E7F241FB7DA5E005E0E00 /* Contacts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contacts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +109,9 @@
 				B95E7EF91FB7CBEB005E0E00 /* Assets.xcassets */,
 				B95E7EFB1FB7CBEB005E0E00 /* LaunchScreen.storyboard */,
 				B95E7EFE1FB7CBEB005E0E00 /* Info.plist */,
+				B95E7F201FB7CFE2005E0E00 /* ContactsTableViewCell.swift */,
+				B95E7F211FB7CFE2005E0E00 /* ContactsTableViewCell.xib */,
+				B95E7F241FB7DA5E005E0E00 /* Contacts.swift */,
 			);
 			path = ContactsSearch;
 			sourceTree = "<group>";
@@ -232,6 +241,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B95E7F231FB7CFE2005E0E00 /* ContactsTableViewCell.xib in Resources */,
 				B95E7EFD1FB7CBEB005E0E00 /* LaunchScreen.storyboard in Resources */,
 				B95E7EFA1FB7CBEB005E0E00 /* Assets.xcassets in Resources */,
 				B95E7EF81FB7CBEB005E0E00 /* Main.storyboard in Resources */,
@@ -259,8 +269,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B95E7F251FB7DA5E005E0E00 /* Contacts.swift in Sources */,
 				B95E7EF51FB7CBEB005E0E00 /* ViewController.swift in Sources */,
 				B95E7EF31FB7CBEB005E0E00 /* AppDelegate.swift in Sources */,
+				B95E7F221FB7CFE2005E0E00 /* ContactsTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,6 +441,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TYA2375JGG;
 				INFOPLIST_FILE = ContactsSearch/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.zhecui.ContactsSearch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -444,6 +457,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TYA2375JGG;
 				INFOPLIST_FILE = ContactsSearch/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.zhecui.ContactsSearch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
