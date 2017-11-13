@@ -13,6 +13,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var contactsTableView: UITableView!
     
     private var contacts: [Contact] = []
+    private var filteredContacts: [Contact] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,6 +28,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         //searchTextView.text = "To: "
         //searchTextView.textColor = UIColor.lightGray
+        
+        ContactList.getPhoneNumbersAndEmails() { contacts in
+            self.contacts = contacts
+            print(self.contacts)
+        }
+
         
         searchTextView.becomeFirstResponder()
     }
@@ -50,27 +57,101 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         */
         
-        let inputText = searchTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        filteredContacts.removeAll()
         
-        ContactList.getPhoneNumbersAndEmails(inputText) { contacts in
-            self.contacts = contacts
+        let inputTextComponents = searchTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: [" "])
+        
+        for contact in contacts {
+            var foundContact = contact
+            var matchingComponentCount = 0
             
-            self.contactsTableView.reloadData()
+            for component in inputTextComponents {
+                var isMatching = false
+                
+                if let range = contact.givenName.range(of: component, options: [.caseInsensitive, .anchored]) {
+                    foundContact.isGivenNameMatched = true
+                    foundContact.givenNameMatchingRange = range
+                    isMatching =  true
+                }
+                
+                if let range = contact.middleName.range(of: component, options: [.caseInsensitive, .anchored]) {
+                    foundContact.isMiddleNameMatched = true
+                    foundContact.middleNameMatchingRange = range
+                    isMatching =  true
+                }
+
+                if let range = contact.familyName.range(of: component, options: [.caseInsensitive, .anchored]) {
+                    foundContact.isFamilyNameMatched = true
+                    foundContact.familyNameMatchingRange = range
+                    isMatching =  true
+                }
+
+                if let range = contact.contentValue.range(of: component, options: [.caseInsensitive]) {
+                    foundContact.isContentValueMatched = true
+                    foundContact.contentValueMatchingRange = range
+                    isMatching =  true
+                }
+                
+                if isMatching {
+                    matchingComponentCount += 1
+                }
+
+            }
+            
+            if matchingComponentCount == inputTextComponents.count {
+                filteredContacts.append(foundContact)
+            }
+            
         }
         
-        /*
-         // Scroll table to top. Otherwise search results might be overlapped by search bar.
-         if tableView.contentOffset != CGPoint.zero {
-         tableView.setContentOffset(CGPoint.zero, animated: false)
-         }
-         */
+        contactsTableView.reloadData()
+        
     }
     
     // TableView DataSource and Delegate functions
     
     private func configureCell(_ cell: ContactsTableViewCell, _ indexPath: IndexPath) {
-        cell.title.text = contacts[indexPath.row].name ?? "Unknown Name"
-        cell.content.text = contacts[indexPath.row].contentValue ?? "Unknown Value"
+        let contact = filteredContacts[indexPath.row]
+        
+        let givenNameAttributedText = NSMutableAttributedString(string: contact.givenName)
+        let middleNameAttributedText = NSMutableAttributedString(string: contact.middleName)
+        let familyNameAttributedText = NSMutableAttributedString(string: contact.familyName)
+        
+        let fullNameAttributedText = NSMutableAttributedString(string: "")
+        
+        let contentValueAttributedText = NSMutableAttributedString(string: contact.contentValue)
+        let spaceAttributedString = NSAttributedString(string: " ")
+        
+        if contact.isGivenNameMatched {
+            givenNameAttributedText.addAttributes([NSAttributedStringKey.font : UIFont.boldSystemFont(ofSize: cell.title.font.pointSize)], range: NSRange(contact.givenNameMatchingRange!, in: contact.givenName))
+        }
+        
+        if contact.isMiddleNameMatched {
+            middleNameAttributedText.addAttributes([NSAttributedStringKey.font : UIFont.boldSystemFont(ofSize: cell.title.font.pointSize)], range: NSRange(contact.middleNameMatchingRange!, in: contact.middleName))
+        }
+        
+        if contact.isFamilyNameMatched {
+            familyNameAttributedText.addAttributes([NSAttributedStringKey.font : UIFont.boldSystemFont(ofSize: cell.title.font.pointSize)], range: NSRange(contact.familyNameMatchingRange!, in: contact.familyName))
+        }
+        
+        if contact.isContentValueMatched {
+            contentValueAttributedText.addAttributes([NSAttributedStringKey.font : UIFont.boldSystemFont(ofSize: cell.content.font.pointSize)], range: NSRange(contact.contentValueMatchingRange!, in: contact.contentValue))
+        }
+        
+        fullNameAttributedText.append(givenNameAttributedText)
+        fullNameAttributedText.append(spaceAttributedString)
+        fullNameAttributedText.append(middleNameAttributedText)
+        fullNameAttributedText.append(spaceAttributedString)
+        fullNameAttributedText.append(familyNameAttributedText)
+
+        if fullNameAttributedText.string != "  " {
+            cell.title.attributedText = fullNameAttributedText
+            cell.content.attributedText = contentValueAttributedText
+        } else {
+            cell.title.attributedText = contentValueAttributedText
+            cell.content.attributedText = contentValueAttributedText
+        }
+        
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -78,7 +159,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return contacts.count
+        return filteredContacts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

@@ -15,30 +15,57 @@ enum ContactContent {
 }
 
 struct Contact {
-    var name: String?
+    var givenName: String = ""
+    var isGivenNameMatched = false
+    var givenNameMatchingRange: Range<String.Index>?
+    
+    var middleName: String = ""
+    var isMiddleNameMatched = false
+    var middleNameMatchingRange: Range<String.Index>?
+    
+    var familyName: String = ""
+    var isFamilyNameMatched = false
+    var familyNameMatchingRange: Range<String.Index>?
+    
+    var contentValue: String = ""
+    var isContentValueMatched = false
+    var contentValueMatchingRange: Range<String.Index>?
+    
+    var contentType: ContactContent! // Phone number or email address
     var contentLabel: String? // "Home" or "Office"
-    var contentValue: String?
-    var contentType: ContactContent? // Phone number or email address
 }
 
 class ContactList {
     
-    static func getPhoneNumbersAndEmails(_ matchingName: String, completion: @escaping ([Contact]) -> ()) {
+    static func getPhoneNumbersAndEmails(completion: @escaping ([Contact]) -> ()) {
         
-        getContact(matchingName) { (contacts) in
+        getAllContacts() { (contacts) in
             var phoneNumbersAndEmails: [Contact] = []
             
             contacts.forEach { (contact) in
-                let fullName = CNContactFormatter.string(from: contact, style: .fullName)
-                
+                var myContact = Contact()
+
+                myContact.givenName = contact.givenName
+                myContact.middleName = contact.middleName
+                myContact.familyName = contact.familyName
+
                 if contact.isKeyAvailable(CNContactEmailAddressesKey) {
                     contact.emailAddresses.forEach({ (email) in
-                        phoneNumbersAndEmails.append(Contact(name: fullName ?? String(email.value), contentLabel: email.label, contentValue: String(email.value), contentType: .email))
+                        myContact.contentValue = String(email.value)
+                        myContact.contentType = .email
+                        myContact.contentLabel = email.label
+
+                        phoneNumbersAndEmails.append(myContact)
                     })
                 }
+                
                 if contact.isKeyAvailable(CNContactPhoneNumbersKey) {
                     contact.phoneNumbers.forEach({ (phoneNumber) in
-                        phoneNumbersAndEmails.append(Contact(name: fullName ?? phoneNumber.value.stringValue, contentLabel: phoneNumber.label, contentValue: phoneNumber.value.stringValue, contentType: .phoneNumber))
+                        myContact.contentValue = phoneNumber.value.stringValue
+                        myContact.contentType = .phoneNumber
+                        myContact.contentLabel = phoneNumber.label
+
+                        phoneNumbersAndEmails.append(myContact)
                     })
                 }
                 
@@ -48,22 +75,29 @@ class ContactList {
         }
     }
     
-    private static func getContact(_ matchingName: String, completion: @escaping ([CNContact]) -> Void) {
-        DispatchQueue.global(qos: .background).async {
-            let predicate = CNContact.predicateForContacts(matchingName: matchingName)
-            let keysToFetch: [CNKeyDescriptor] = [CNContactFormatter.descriptorForRequiredKeys(for: .fullName), CNContactPhoneNumbersKey as CNKeyDescriptor, CNContactEmailAddressesKey as CNKeyDescriptor]
-            let store = CNContactStore()
-            
-            var unifiedContacts: [CNContact] = []
-            do {
-                unifiedContacts = try store.unifiedContacts(matching: predicate, keysToFetch: keysToFetch)
-            } catch {
-                print(error)
+    private static func getAllContacts(completion: @escaping ([CNContact]) -> Void) {
+        
+        let store = CNContactStore()
+        let keysToFetch: [CNKeyDescriptor] = [
+            CNContactGivenNameKey as CNKeyDescriptor,
+            CNContactMiddleNameKey as CNKeyDescriptor,
+            CNContactFamilyNameKey as CNKeyDescriptor,
+            CNContactPhoneNumbersKey as CNKeyDescriptor,
+            CNContactEmailAddressesKey as CNKeyDescriptor
+        ]
+        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch)
+        var unifiedContacts: [CNContact] = []
+        
+        do {
+            try store.enumerateContacts(with: fetchRequest) { (contact, _) in
+                unifiedContacts.append(contact)
             }
-            
-            DispatchQueue.main.async {
-                completion(unifiedContacts)
-            }
+        } catch {
+            print(error)
+        }
+        
+        DispatchQueue.main.async {
+            completion(unifiedContacts)
         }
     }
     
