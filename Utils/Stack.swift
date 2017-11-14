@@ -21,16 +21,21 @@ struct Stack<T> {
         stack.append(element)
     }
     
-    @discardableResult mutating func pop() -> T {
+    func peek() -> T? {
+        return stack.last
+    }
+    
+    @discardableResult mutating func pop() -> T? {
+        guard !stack.isEmpty else { return nil }
         return stack.removeLast()
     }
     
-    @discardableResult mutating func popLast(_ count: Int) -> [T] {
+    @discardableResult mutating func popLast(_ count: Int) -> [T]? {
+        guard count <= self.count else { return nil }
         var popped: [T] = []
-        let total = self.count < count ? self.count : count
         
-        for _ in 0 ..< total {
-            popped.append(pop())
+        for _ in 0 ..< count {
+            popped.append(pop()!)
         }
         
         return popped

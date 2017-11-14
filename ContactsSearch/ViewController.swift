@@ -15,14 +15,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     private var contacts: [Contact] = []
     private var filteredContacts: [Contact] = []
     
-    //private var searchTextViewOffset = 0
-    //private var searchTextViewStartPosition: UITextPosition!
-    
-    private var replaceRangeStartPosition: UITextPosition!
-    //private var replaceRangeEndPosition: UITextPosition!
-    private var textViewTextCount = 0
-    
-    private var searchTextStack = Stack<String>()
+    private var searchTextStack: [String] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,51 +39,75 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
 
         searchTextView.becomeFirstResponder()
-        
-        replaceRangeStartPosition = searchTextView.position(from: searchTextView.beginningOfDocument, offset: 0)
-        
     }
-    
-    /*
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == "To:" {
-            textView.text = nil
-            textView.textColor = UIColor.black
-        }
-    }
-    */
-
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        if text.count == 0 {
-            searchTextStack.popLast(range.length)
-        } else {
-            searchTextStack.push(text)
+        if range.length == 1 { // Delete
+            if searchTextStack.isEmpty {
+                filteredContacts.removeAll()
+                contactsTableView.reloadData()
+
+                return false
+            }
+            
+            if searchTextStack.last! == "{}" { // Delete a contact
+                repeat {
+                    searchTextStack.removeLast()
+                } while searchTextStack.last != nil && searchTextStack.last! != "{}"
+            
+                textView.text = searchTextStack.map({ return $0 == "{}" ? ", " : $0 }).joined().trimmingCharacters(in: [",", " "])
+
+                filteredContacts.removeAll()
+                contactsTableView.reloadData()
+
+                return false
+            } else { // Delete a character
+                searchTextStack.removeLast()
+                textView.text = searchTextStack.map({ return $0 == "{}" ? ", " : $0 }).joined()
+
+                searchContacts()
+                
+                return false
+            }
+        } else { // Add a character
+            searchTextStack.append(text)
+            
+            var string = searchTextStack.map({ return $0 == "{}" ? ", " : $0 }).joined()
+            
+            if string.count > 1, string.suffix(2) == ", " {
+                string.removeLast(2)
+            }
+            if searchTextStack.count > 1 {
+                let lastTwo = searchTextStack.suffix(2)
+                if lastTwo.first! == "{}", (lastTwo.last! == "," || lastTwo.last! == " ") {
+                    searchTextStack.removeLast()
+                    string.removeLast()
+                }
+            }
+            
+            textView.text = string
+            
+            searchContacts()
+            
+            return false
         }
-        
-        return true
     }
     
-    func textViewDidChange(_ textView: UITextView) {
-        
+    private func searchContacts() {
         filteredContacts.removeAll()
-
-        guard let searchRangeStartPosition = replaceRangeStartPosition,
-            let searchRangeEngPosition = textView.position(from: searchRangeStartPosition, offset: textView.text.count - textViewTextCount) else {
-            return
+        
+        var searchCharacters: [String] = []
+        var index = searchTextStack.endIndex - 1
+        
+        while index >= 0, searchTextStack[index] != "{}" {
+            searchCharacters.insert(searchTextStack[index], at: 0)
+            index -= 1
         }
         
-        guard let searchTextRange = textView.textRange(from: searchRangeStartPosition, to: searchRangeEngPosition),
-            let searchText = textView.text(in: searchTextRange) else {
-                return
-        }
-
-        //textViewTextCount = textView.text.count
-        //replaceRangeStartPosition = textView.position(from: textView.beginningOfDocument, offset: textViewTextCount)
-
-        let inputTextComponents = searchText.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: [" "])
-        
-        //let inputTextComponents = searchTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: [" "])
+        let inputTextComponents = searchCharacters
+            .joined()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: .whitespaces)
         
         for contact in contacts {
             var foundContact = contact
@@ -110,13 +127,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     foundContact.middleNameMatchingRange = range
                     isMatching =  true
                 }
-
+                
                 if let range = contact.familyName.range(of: component, options: [.caseInsensitive, .anchored]) {
                     foundContact.isFamilyNameMatched = true
                     foundContact.familyNameMatchingRange = range
                     isMatching =  true
                 }
-
+                
                 if let range = contact.contentValue.range(of: component, options: [.caseInsensitive]) {
                     foundContact.isContentValueMatched = true
                     foundContact.contentValueMatchingRange = range
@@ -126,7 +143,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 if isMatching {
                     matchingComponentCount += 1
                 }
-
+                
             }
             
             if matchingComponentCount == inputTextComponents.count {
@@ -136,7 +153,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         contactsTableView.reloadData()
-        
     }
     
     // TableView DataSource and Delegate functions
@@ -206,80 +222,20 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedCell = tableView.cellForRow(at: indexPath) as! ContactsTableViewCell
-        guard let titleText = selectedCell.title.text else {
+        guard let selectedCell = tableView.cellForRow(at: indexPath) as? ContactsTableViewCell,
+            let titleText = selectedCell.title.text else {
             return
         }
         
-        guard let replaceRangeEndPosition = searchTextView.position(from: replaceRangeStartPosition, offset: searchTextView.text.count - textViewTextCount) else {
-            return
+        while searchTextStack.last != nil, searchTextStack.last! != "{}" {
+            searchTextStack.removeLast()
         }
         
-        guard let replaceRange = searchTextView.textRange(from: replaceRangeStartPosition, to: replaceRangeEndPosition) else {
-            return
-        }
-        
-        searchTextView.replace(replaceRange, withText: titleText + ", ")
-        
-        textViewTextCount = searchTextView.text.count
-        replaceRangeStartPosition = searchTextView.position(from: searchTextView.beginningOfDocument, offset: textViewTextCount)
+        searchTextStack.append(titleText)
+        searchTextStack.append("{}")
 
-        
-        
-        //searchTextView.selectedRange = NSMakeRange(searchTextViewStartPosition, 0)
-        
-        //searchTextViewOffset = titleText.count
-        
-        /*
-        guard let selectedTextRange = searchTextView.selectedTextRange else {
-            return
-        }
-        */
-        
-        
-        //_ = textView(searchTextView, shouldChangeTextIn: nsRange, replacementText: titleText)
-        
-        /*
-        guard let replaceEndPosition = searchTextView.position(from: searchTextViewStartPosition, offset: searchTextView.text.count - previousTextViewTextCount) else {
-            return
-        }
-        
-        let replaceRange = searchTextView.textRange(from: searchTextViewStartPosition, to: replaceEndPosition)
-        
-        
-        let location = searchTextView.offset(from: searchTextView.beginningOfDocument, to: selectedTextRange.start)
-        let length = searchTextView.offset(from: selectedTextRange.start, to: selectedTextRange.end)
-        let nsRange = NSMakeRange(location, length)
-        
-        _ = textView(searchTextView, shouldChangeTextIn: nsRange, replacementText: titleText)
-        */
-        /*
-        guard let newPosition = searchTextView.position(from: searchTextViewStartPosition, offset: searchTextViewOffset) else {
-            return
-        }
-        
-        searchTextView.selectedTextRange = searchTextView.textRange(from: searchTextViewStartPosition, to: newPosition)
-        */
-        
-        //searchTextViewStartPosition = newPosition
-        
-        
-        
-        /*
-         let fullNameAttributedText = NSMutableAttributedString(string: selectedCell.title.text!)
-         fullNameAttributedText.addAttributes([NSAttributedStringKey.foregroundColor : UIColor.blue], range: NSRange(selectedCell.title.text!.range(of: selectedCell.title.text!)!, in: selectedCell.title.text!))
-         
-         let attributed = NSMutableAttributedString(string: "")
-         attributed.append(fullNameAttributedText)
-         
-         searchTextView.attributedText = fullNameAttributedText
-         */
-        
-        //searchTextView.text = selectedCell.title.text!
-        
-        //let position = CGPoint(x: searchTextView.textContainer.lineFragmentPadding, y: searchTextView.textContainerInset.top)
-        
-        //searchTextView.addButton(with: selectedCell.title.text!, tag: 0, to: position)
+        searchTextView.text = searchTextStack.map({ return $0 == "{}" ? ", " : $0 }).joined().trimmingCharacters(in: [",", " "])
+
     }
 }
 
